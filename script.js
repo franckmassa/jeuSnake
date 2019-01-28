@@ -1,7 +1,7 @@
 // La fonction javascript va être lancée quand la fenêtre va s'afficher
 window.onload = function() {
 
-// on place les variables
+// on déclare les variables
     var canvasWidth = 900;
     var canvasHeight = 600;
     var blockSize = 30;
@@ -30,7 +30,7 @@ window.onload = function() {
         ctx = canvas.getContext('2d');
 
         // On instancie l'objet snakee avec les arguments de position en commençant par la tête
-        snakee = new Snake([[6,4], [5,4], [4,4]]);
+        snakee = new Snake([[6, 4], [5, 4], [4, 4]]);
 
         // On appelle la fonction pour rafraichir le canvas
         refreshCanvas();
@@ -45,23 +45,23 @@ window.onload = function() {
         // On appelle la méthode draw
         snakee.draw();
         // La fonction setTimeout permet de rappeler la fonction refreshCanvas après le delay de 1s 
-        setTimeout(refreshCanvas,delay);
+        setTimeout(refreshCanvas, delay);
     }
 
     // On crée la fonction drawBlock pour dessiner un block
-    function drawBlock(ctx, position){
+    function drawBlock(ctx, position) {
         // La coordonnées x est égal à la position (nombre de block) * la taille du block
         var x = position[0] * blockSize; // horizontal:  6 * 30px = 180px (tête); 150px(milieu); 120px(queue) 
         var y = position[1] * blockSize; // Vertical: 4 * 30px = 120px (tête, milieu, queue)
-        
+
         // Définition du block
-        ctx.fillRect(x, y, blockSize, blockSize); 
+        ctx.fillRect(x, y, blockSize, blockSize);
     }
 
 
     // On crée une fonction construsteur snake
     function Snake(body) {
-        
+
         this.body = body;
         // On crée la méthode draw pour dessiner le serpent
         this.draw = function() {
@@ -81,4 +81,4 @@ window.onload = function() {
             ctx.restore();
         };
     }
-    };
+};

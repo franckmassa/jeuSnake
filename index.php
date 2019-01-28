@@ -5,14 +5,8 @@
         <title>Jeu du serpent</title>
     </head>
     <body>
-    
-        
-        
+
         <script src='script.js'></script>
     </body>
-
-
-
-
 
 </html>
