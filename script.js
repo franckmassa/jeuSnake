@@ -41,6 +41,9 @@ window.onload = function() {
 
         // On rafraichi la position du rectangle
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        
+        // On appelle la fonction advance
+        snakee.advance();
 
         // On appelle la méthode draw
         snakee.draw();
@@ -58,11 +61,10 @@ window.onload = function() {
         ctx.fillRect(x, y, blockSize, blockSize);
     }
 
-
     // On crée une fonction construsteur snake
     function Snake(body) {
-
         this.body = body;
+
         // On crée la méthode draw pour dessiner le serpent
         this.draw = function() {
             // On sauvegarde le context avant de dessiner 
@@ -79,6 +81,23 @@ window.onload = function() {
 
             // On utilse la fonction restore qui permet de remettre le context comme il était avant
             ctx.restore();
+        };
+
+        // On crée la méthode pour faire avancer le serpent
+        this.advance = function() {
+            /* Avec la fonction slice, on copie le 1er élément (tête du serpent) [6,4] qui correspond 
+             * à la position 0 du tableau Snake 
+             */
+            var nextPosition = this.body[0].slice(); // le nextPosition c'est le [6,4]
+
+            // On fait avancer le nextPosition de 1 horizonralement
+            nextPosition[0] += 1; // 0 correspond à la position de la valeur 6 dans le tableau [6,4] (tête du serpent) 
+
+            // On colle à la 1ère place du corps du serpent le nextPosition ce qui donne  Snake([[7,4], [6, 4], [5, 4], [4, 4]])
+            this.body.unshift(nextPosition);
+
+            // On supprime la dernière position du corps du serpent [4,4] avec la fonction pop 
+            this.body.pop();
         };
     }
 };
