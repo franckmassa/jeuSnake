@@ -1,4 +1,4 @@
-// La fonction javascript va être lancée quand la fenêtre va s'afficher
+// On crée l'évènement onload. La fonction javascript sera exécutée quand la fenêtre s'affichera
 window.onload = function() {
 
 // on déclare les variables
@@ -6,32 +6,25 @@ window.onload = function() {
     var canvasHeight = 600;
     var blockSize = 30;
     var ctx;
-    var delay = 100; // en milliseconde
+    var delay = 700; // en milliseconde
     var snakee;
-
     // On appelle la fonction init()
     init();
-
     // On crée une fonction d'initialisation
     function init() {
 
         // On crée une variable qui va contenir  un élément de type canvas
         var canvas = document.createElement('canvas');
-
         // On crée le canvas
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
         canvas.style.border = '1px solid';
-
         // On rattache le canvas au body de la page html avec la fonction appendchild()
         document.body.appendChild(canvas);
-
         // On crée le contexte ctx en 2d
         ctx = canvas.getContext('2d');
-
-        // On instancie l'objet snakee avec les arguments de position en commençant par la tête
-        snakee = new Snake([[6, 4], [5, 4], [4, 4]]);
-
+        // On instancie l'objet snakee avec les arguments de position en commençant par la tête [6,4]
+        snakee = new Snake([[6, 4], [5, 4], [4, 4]], 'right');
         // On appelle la fonction pour rafraichir le canvas
         refreshCanvas();
     }
@@ -41,10 +34,8 @@ window.onload = function() {
 
         // On rafraichi la position du rectangle
         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-        
         // On appelle la fonction advance
         snakee.advance();
-
         // On appelle la méthode draw
         snakee.draw();
         // La fonction setTimeout permet de rappeler la fonction refreshCanvas après le delay de 1s 
@@ -62,15 +53,14 @@ window.onload = function() {
     }
 
     // On crée une fonction construsteur snake
-    function Snake(body) {
+    function Snake(body, direction) {
         this.body = body;
-
+        this.direction = direction;
         // On crée la méthode draw pour dessiner le serpent
         this.draw = function() {
             // On sauvegarde le context avant de dessiner 
             ctx.save();
             ctx.fillStyle = '#ff0000';
-
             /* On crée une boucle pour dessiner le serpent.
              Tant que i < au nombre de blocks caractérisant le corps du serpent, on ajoute un block
              */
@@ -90,14 +80,80 @@ window.onload = function() {
              */
             var nextPosition = this.body[0].slice(); // le nextPosition c'est le [6,4]
 
-            // On fait avancer le nextPosition de 1 horizonralement
-            nextPosition[0] += 1; // 0 correspond à la position de la valeur 6 dans le tableau [6,4] (tête du serpent) 
-
+            // On fait avancer le nextPosition 
+            switch (this.direction) {
+                case 'right':
+                    nextPosition[0] += 1; // 0 étant la position x (exemple: [x, y]
+                    break;
+                case 'left':
+                    nextPosition[0] -= 1;
+                    break;
+                case 'down':
+                    nextPosition[1] += 1; // 1 étant la position y (exemple: [x, y]
+                    break;
+                case 'up':
+                    nextPosition[1] -= 1;
+                    break;
+                    // sinon, la fonction throw permet d'afficher un message d'erreur 
+                default :
+                    throw('Invalid direction');
+            }
             // On colle à la 1ère place du corps du serpent le nextPosition ce qui donne  Snake([[7,4], [6, 4], [5, 4], [4, 4]])
             this.body.unshift(nextPosition);
-
             // On supprime la dernière position du corps du serpent [4,4] avec la fonction pop 
             this.body.pop();
         };
+
+// on crée une méthode pour les nouvelles directions permises
+        this.setDirection = function(newDirection) {
+
+// On déclare une variable direction permise
+            var allowedDirections;
+            // On crée les conditions pour les directions permises
+            switch (this.direction) {
+                case 'left':
+                case 'right':
+                    allowedDirections = ['up', 'down']; // up est en position 0 (> -1) et down est en position 1 (> -1)
+                    break;
+                case 'down':
+                case 'up':
+                    allowedDirections = ['left', 'right']; // left est en position 0 (> -1) et right est en position 1 (> -1)
+                    break;
+                    // sinon, la fonction throw permet d'afficher un message d'erreur 
+                default :
+                    throw ('Invalid direction');
+            }
+
+// Si l'index de la nouvelle direction dans la variable allowedDirection est > -1, alors elle est permise
+            if (allowedDirections.indexOf(newDirection) > -1) {
+                this.direction = newDirection;
+            }
+        };
     }
-};
+
+// On crée l'évènement onkeydown. La fonction handleKeyDown sera éxécutée quand la touche sera appuyée
+    document.onkeydown = function handleKeyDown(e) { // e est l'évènement
+        var key = e.keyCode; // cela va nous donner le code que la touche va appuyer
+        var newDirection;
+        switch (key) {
+            case 37:
+                newDirection = 'left';
+                break;
+            case 38:
+                newDirection = 'up';
+                break;
+            case 39:
+                newDirection = 'right';
+                break;
+            case 40:
+                newDirection = 'down';
+                break;
+                // Sinon on ne continue pas la fonction, on arrête et on retourne 
+            default :
+                return;
+        }
+
+        snakee.setDirection(newDirection);
+    }
+}
+
