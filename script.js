@@ -8,6 +8,7 @@ window.onload = function() {
     var ctx;
     var delay = 700; // en milliseconde
     var snakee;
+    var applee;
     // On appelle la fonction init()
     init();
     // On crée une fonction d'initialisation
@@ -23,8 +24,14 @@ window.onload = function() {
         document.body.appendChild(canvas);
         // On crée le contexte ctx en 2d
         ctx = canvas.getContext('2d');
+
         // On instancie l'objet snakee avec les arguments de position en commençant par la tête [6,4]
         snakee = new Snake([[6, 4], [5, 4], [4, 4]], 'right');
+
+        // On instancie l'objet applee avec les arguments de position
+        applee = new Apple([10, 10]);
+
+
         // On appelle la fonction pour rafraichir le canvas
         refreshCanvas();
     }
@@ -38,6 +45,10 @@ window.onload = function() {
         snakee.advance();
         // On appelle la méthode draw
         snakee.draw();
+        // On appelle la méthode draw
+        applee.draw();
+
+
         // La fonction setTimeout permet de rappeler la fonction refreshCanvas après le delay de 1s 
         setTimeout(refreshCanvas, delay);
     }
@@ -128,6 +139,31 @@ window.onload = function() {
             if (allowedDirections.indexOf(newDirection) > -1) {
                 this.direction = newDirection;
             }
+        };
+    }
+
+    // On crée une fonction construsteur apple
+    function Apple(position) {
+        this.position = position;
+        // création de la méthode pour dessiner la pomme
+        this.draw = function() {
+
+            // on enregistre les anciens paramètres de canvas
+            ctx.save();
+            ctx.fillStyle = '#33cc33';
+            ctx.beginPath();
+            // Le rond va prendre la moitié d'un blockSize
+            var radius = blockSize / 2;
+            // On défini la position x (qui est le centre du rond)
+            var x = position[0] * blockSize + radius;
+            // On défini la position y (qui est le centre du rond)
+            var y = position[1] * blockSize + radius;
+            // On dessine le rond avec la fonction arc, 
+            ctx.arc(x, y, radius, 0, Math.PI * 2, true);
+            // On rempli le cercle avec la fonction fill
+            ctx.fill();
+            // On restore les anciens apramètres de canvas
+            ctx.restore();
         };
     }
 
