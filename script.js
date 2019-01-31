@@ -6,16 +6,16 @@ window.onload = function() {
     var canvasHeight = 600;
     var blockSize = 30;
     // On crée une variable qui stockera la largeur du canvas en nombre de blocks et non en pixels
-    var widthInBlocks = canvasWidth/blockSize;
+    var widthInBlocks = canvasWidth / blockSize;
     // On crée une variable qui stockera la largeur du canvas en nombre de blocks et non en pixels
-    var heightInBlocks = canvasHeight/blockSize;
+    var heightInBlocks = canvasHeight / blockSize;
     var ctx;
     var delay = 300; // en milliseconde
     var snakee;
     var applee;
     // On appelle la fonction init()
     init();
-    // On crée une fonction d'initialisation
+    // On crée une fonction d'initialisation 
     function init() {
 
         // On crée une variable qui va contenir  un élément de type canvas
@@ -30,7 +30,7 @@ window.onload = function() {
         ctx = canvas.getContext('2d');
 
         // On instancie l'objet snakee avec les arguments de position en commençant par la tête [6,4]
-        snakee = new Snake([[6, 4], [5, 4], [4, 4]], 'right');
+        snakee = new Snake([[6, 4], [5, 4], [4, 4], [3, 4], [2, 4]], 'right');
 
         // On instancie l'objet applee avec les arguments de position
         applee = new Apple([10, 10]);
@@ -44,23 +44,32 @@ window.onload = function() {
     function refreshCanvas() {
         // On appelle la fonction advance
         snakee.advance();
-        
-        // Si la tête de serpent entre en collision
-        if (snakee.checkCollision()){
-            
-            // Game over
-            
-        } else {
-            
-        // On rafraichi la position du rectangle
-        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-        // On appelle la méthode draw
-        snakee.draw();
-        // On appelle la méthode draw
-        applee.draw();
 
-        // La fonction setTimeout permet de rappeler la fonction refreshCanvas après le delay de 1s 
-        setTimeout(refreshCanvas, delay);           
+        // Si la tête de serpent entre en collision
+        if (snakee.checkCollision()) {
+
+            // Game over
+
+        } else {
+            // Si le serpent à manger la pomme on va placer la pomme à un nouvel endroit
+            if (snakee.isEatingApple(applee)) {
+                // Le serpent a mangé une pomme
+                snakee.ateApple = true;
+                // On donne une nouvelle position à la pomme tant qu'elle est sur le serpent 
+                do {
+                    applee.setNewPosition();
+                } while (applee.isOnSnake(snakee))
+            }
+
+            // On rafraichi la position du rectangle
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            // On appelle la méthode draw
+            snakee.draw();
+            // On appelle la méthode draw
+            applee.draw();
+
+            // La fonction setTimeout permet de rappeler la fonction refreshCanvas après le delay de 1s 
+            setTimeout(refreshCanvas, delay);
         }
     }
 
@@ -78,6 +87,8 @@ window.onload = function() {
     function Snake(body, direction) {
         this.body = body;
         this.direction = direction;
+        // On rajoute une propriété pour la pomme mangée
+        this.ateApple = false; // false pour éviter que le serpent grandisse tout de suite (true par défaut)
         // On crée la méthode draw pour dessiner le serpent
         this.draw = function() {
             // On sauvegarde le context avant de dessiner 
@@ -122,8 +133,13 @@ window.onload = function() {
             }
             // On colle à la 1ère place du corps du serpent le nextPosition ce qui donne  Snake([[7,4], [6, 4], [5, 4], [4, 4]])
             this.body.unshift(nextPosition);
-            // On supprime la dernière position du corps du serpent [4,4] avec la fonction pop 
-            this.body.pop();
+            // Si le serpent n'a pas mangé de pomme
+            if (!this.ateApple) {
+                // On supprime la dernière position du corps du serpent [4,4] avec la fonction pop 
+                this.body.pop();
+            } else {
+                this.ateApple = false;
+            }
         };
 
         // on crée une méthode pour les nouvelles directions permises
@@ -149,47 +165,60 @@ window.onload = function() {
                 this.direction = newDirection;
             }
         };
-        
+
         // On crée une méthode control collision du serpent avec un mur (canvas) ou avec lui-même
-        this.checkCollision = function(){
+        this.checkCollision = function() {
             // On initialise à false 
             var wallCollision = false;
             var snakeCollision = false;
             // On vérifie la collision de la tête car elle qui touche en premier
             var head = this.body[0]; // 0 étant la position du block tête ([[6,4], [5,4], ----]])
-            
+
             /* La fonction slice permet de copier et de passer le 0 (avec la valeur 1)
-                pour mettre le rest de corps dans la variable rest */
+             pour mettre le rest de corps dans la variable rest */
             var rest = this.body.slice(1);
-            
+
             var snakeX = head[0]; // 0 étant la position du x du block
             var snakeY = head[1]; // 1 étant la position du y du block
             var minX = 0; // On initialise la valeur du mur de gauche à 0
             var minY = 0; // On initialise la valeur du mur du haut à 0
-            var maxX = widthInBlocks -1; // largeur du canvas - 1 block
-            var maxY = heightInBlocks -1; // hauteur du canvas -1 block
+            var maxX = widthInBlocks - 1; // largeur du canvas - 1 block
+            var maxY = heightInBlocks - 1; // hauteur du canvas -1 block
             // On vérifie que la tête du serpent n'est pas entre les mur de droite et de gauche
             var isNotBetweenHorizontalWall = snakeX < minX || snakeX > maxX;
             // On vérifie que la tête du serpent n'est pas entre les mur du haut et du bas
             var isNotBetweenVerticalWall = snakeY < minY || snakeY > maxY;
-            
+
             // On vérifie si la la tête de serpent n'est pas entre les murs 
-            if(isNotBetweenHorizontalWall || isNotBetweenVerticalWall){
+            if (isNotBetweenHorizontalWall || isNotBetweenVerticalWall) {
                 // il y a une collision
                 wallCollision = true;
             }
-            
+
             // On vérifie que le serpent ne s'est pas passé sur le reste du corps   
-            for (var i = 0; i < rest.length; i++){
-                if (snakeX === rest[i][0] && snakeY === rest[i][1]){
+            for (var i = 0; i < rest.length; i++) {
+                if (snakeX === rest[i][0] && snakeY === rest[i][1]) {
                     snakeCollision = true;
                 }
             }
             // 
             return wallCollision || snakeCollision;
         };
+
+        // On crée une methode  le serpent mang t-il une pomme?
+        this.isEatingApple = function(appleToEat) {
+            // On crée une variable head qui contient la position x de la tête 
+            var head = this.body[0]; // 0 étant le x de la tête
+            // Si la position de la tête du serpent a la même position que la pomme
+            if (head[0] === appleToEat.position[0] && head[1] === appleToEat.position[1]) {
+                // Le serpent a manger la pomme
+                return true;
+            } else {
+                return false;
+            }
+        };
     }
- 
+
     // On crée une fonction construsteur apple
     function Apple(position) {
         this.position = position;
@@ -203,9 +232,9 @@ window.onload = function() {
             // Le rond va prendre la moitié d'un blockSize
             var radius = blockSize / 2;
             // On défini la position x (qui est le centre du rond)
-            var x = position[0] * blockSize + radius;
+            var x = this.position[0] * blockSize + radius;
             // On défini la position y (qui est le centre du rond)
-            var y = position[1] * blockSize + radius;
+            var y = this.position[1] * blockSize + radius;
             // On dessine le rond avec la fonction arc, 
             ctx.arc(x, y, radius, 0, Math.PI * 2, true);
             // On rempli le cercle avec la fonction fill
@@ -213,6 +242,30 @@ window.onload = function() {
             // On restore les anciens apramètres de canvas
             ctx.restore();
         };
+
+        // on crée une méthode pour donner une nouvelle position à la pomme, de façon aléatoire et avec un nombre entier
+        this.setNewPosition = function() {
+            var newX = Math.round(Math.random() * (widthInBlocks - 1));
+            var newY = Math.round(Math.random() * (heightInBlocks - 1));
+            // On donne la nouvelle position
+            this.position = [newX, newY];
+        };
+
+        // on crée une méthode pour voir si la nouvelle position de la pomme est sur le serpent 
+        this.isOnSnake = function(snakeToCheck) {
+            // On initialise la variable isOSnake à false (pas sur le serpent)
+            var isOnSnake = false;
+            // on crée une boucle pour passer sur tout le corps du serpent   
+            for (var i = 0; i < snakeToCheck.body.length; i++) {
+                // i étant le block du serpent et 0  le x et 1 le y du block 
+                if (this.position[0] === snakeToCheck.body[i][0] && this.position[1] === snakeToCheck.body[i][1]) {
+                    // la pomme est sur le serpent
+                    isOnSnake = true;
+                }
+            }
+            return isOnSnake;
+        };
+
     }
 
 // On crée l'évènement onkeydown. La fonction handleKeyDown sera éxécutée quand la touche sera appuyée
@@ -238,6 +291,6 @@ window.onload = function() {
         }
 
         snakee.setDirection(newDirection);
-    }
-}
+    };
+};
 
