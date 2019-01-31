@@ -24,7 +24,12 @@ window.onload = function() {
         // On crée le canvas
         canvas.width = canvasWidth;
         canvas.height = canvasHeight;
-        canvas.style.border = '1px solid';
+
+        // On donne du style au jeu avec le css
+        canvas.style.border = '30px solid grey';
+        canvas.style.margin = '50px auto';
+        canvas.style.display = 'block';
+        canvas.style.backgroundColor = '#ddd';
         // On rattache le canvas au body de la page html avec la fonction appendchild()
         document.body.appendChild(canvas);
         // On crée le contexte ctx en 2d
@@ -67,12 +72,16 @@ window.onload = function() {
 
             // On rafraichi la position du rectangle
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            /* On appelle la fonction draw.score avant snakee.draw et applee.draw 
+             * pour que l'affichage du score soit en arrière plan
+             */
+            drawScore();
+
             // On appelle la méthode draw
             snakee.draw();
             // On appelle la méthode draw
             applee.draw();
-            // On appelle la fonction draw.score
-            drawScore();
             // La fonction setTimeout permet de rappeler la fonction refreshCanvas après le delay de 1s 
             setTimeout(refreshCanvas, delay);
         }
@@ -80,10 +89,28 @@ window.onload = function() {
     // création de la function gamOver
     function gameOver() {
         ctx.save();
-        // On ecrit le texte gameOver avec la position x = 5px et Y = 15px
-        ctx.fillText('Game Over', 5, 15);
-        // On ecrit le texte 2éme texte
-        ctx.fillText('Appuyer sur la touche Espace pour rejouer', 5, 30);
+
+        // On donne du style à la police avec le css
+        ctx.font = 'bold 70px sans-serif';
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'center';
+        // On centre les caractères par rapport à leur milieu
+        ctx.textBaseline = 'middle';
+        // On utilise la fonction stokeStyle pour faire un cadre
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = '5';
+        // On calcule le centre du canvas
+        var centerX = canvasWidth / 2;
+        var centerY = canvasHeight / 2;
+        // On rempli le texte avec la fonction strokeText , centré horizontalement et verticalement avec un retrait de 180px
+        ctx.strokeText('Game Over', centerX, centerY - 230);
+        // On ecrit le texte centré horizontalement et verticalement avec un retrait de 180px
+        ctx.fillText('Game Over', centerX, centerY - 230);
+        ctx.font = 'bold 30px sans-serif';
+        // On rempli le texte avec la fonction strokeText , centré horizontalement et verticalement avec un retrait de 120px
+        ctx.strokeText('Appuyer sur la touche Espace pour rejouer', centerX, centerY - 170);
+        // On ecrit le texte centré horizontalement et verticalement avec un retrait de 120px
+        ctx.fillText('Appuyer sur la touche Espace pour rejouer', centerX, centerY - 170);
 
         ctx.restore();
     }
@@ -106,8 +133,18 @@ window.onload = function() {
     function drawScore() {
         ctx.save();
 
-        // On ecrit le nombre du score sous format string avec la fonction toString
-        ctx.fillText(score.toString(), 5, canvasHeight - 5);
+        // On donne du style à la police avec le css
+        ctx.font = 'bold 200px sans-serif';
+        ctx.fillStyle = 'grey';
+        ctx.textAlign = 'center';
+        // On centre les caractères par rapport à leur milieu
+        ctx.textBaseline = 'middle';
+
+        // On calcule le centre du canvas
+        var centerX = canvasWidth / 2;
+        var centerY = canvasHeight / 2;
+        // On ecrit le nombre du score sous format string avec la fonction toString et on centre sur le canvas
+        ctx.fillText(score.toString(), centerX, centerY);
 
         ctx.restore();
 
@@ -307,7 +344,6 @@ window.onload = function() {
         };
 
     }
-
 
     // On crée l'évènement onkeydown. La fonction handleKeyDown sera éxécutée quand la touche sera appuyée
     document.onkeydown = function handleKeyDown(e) { // e est l'évènement
