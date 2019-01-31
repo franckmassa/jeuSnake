@@ -5,8 +5,12 @@ window.onload = function() {
     var canvasWidth = 900;
     var canvasHeight = 600;
     var blockSize = 30;
+    // On crée une variable qui stockera la largeur du canvas en nombre de blocks et non en pixels
+    var widthInBlocks = canvasWidth/blockSize;
+    // On crée une variable qui stockera la largeur du canvas en nombre de blocks et non en pixels
+    var heightInBlocks = canvasHeight/blockSize;
     var ctx;
-    var delay = 700; // en milliseconde
+    var delay = 300; // en milliseconde
     var snakee;
     var applee;
     // On appelle la fonction init()
@@ -38,19 +42,26 @@ window.onload = function() {
 
     // On crée la fonction refreshCanvas
     function refreshCanvas() {
-
-        // On rafraichi la position du rectangle
-        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         // On appelle la fonction advance
         snakee.advance();
+        
+        // Si la tête de serpent entre en collision
+        if (snakee.checkCollision()){
+            
+            // Game over
+            
+        } else {
+            
+        // On rafraichi la position du rectangle
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
         // On appelle la méthode draw
         snakee.draw();
         // On appelle la méthode draw
         applee.draw();
 
-
         // La fonction setTimeout permet de rappeler la fonction refreshCanvas après le delay de 1s 
-        setTimeout(refreshCanvas, delay);
+        setTimeout(refreshCanvas, delay);           
+        }
     }
 
     // On crée la fonction drawBlock pour dessiner un block
@@ -115,10 +126,9 @@ window.onload = function() {
             this.body.pop();
         };
 
-// on crée une méthode pour les nouvelles directions permises
+        // on crée une méthode pour les nouvelles directions permises
         this.setDirection = function(newDirection) {
-
-// On déclare une variable direction permise
+            // On déclare une variable direction permise
             var allowedDirections;
             // On crée les conditions pour les directions permises
             switch (this.direction) {
@@ -134,14 +144,52 @@ window.onload = function() {
                 default :
                     throw ('Invalid direction');
             }
-
-// Si l'index de la nouvelle direction dans la variable allowedDirection est > -1, alors elle est permise
+            // Si l'index de la nouvelle direction dans la variable allowedDirection est > -1, alors elle est permise
             if (allowedDirections.indexOf(newDirection) > -1) {
                 this.direction = newDirection;
             }
         };
+        
+        // On crée une méthode control collision du serpent avec un mur (canvas) ou avec lui-même
+        this.checkCollision = function(){
+            // On initialise à false 
+            var wallCollision = false;
+            var snakeCollision = false;
+            // On vérifie la collision de la tête car elle qui touche en premier
+            var head = this.body[0]; // 0 étant la position du block tête ([[6,4], [5,4], ----]])
+            
+            /* La fonction slice permet de copier et de passer le 0 (avec la valeur 1)
+                pour mettre le rest de corps dans la variable rest */
+            var rest = this.body.slice(1);
+            
+            var snakeX = head[0]; // 0 étant la position du x du block
+            var snakeY = head[1]; // 1 étant la position du y du block
+            var minX = 0; // On initialise la valeur du mur de gauche à 0
+            var minY = 0; // On initialise la valeur du mur du haut à 0
+            var maxX = widthInBlocks -1; // largeur du canvas - 1 block
+            var maxY = heightInBlocks -1; // hauteur du canvas -1 block
+            // On vérifie que la tête du serpent n'est pas entre les mur de droite et de gauche
+            var isNotBetweenHorizontalWall = snakeX < minX || snakeX > maxX;
+            // On vérifie que la tête du serpent n'est pas entre les mur du haut et du bas
+            var isNotBetweenVerticalWall = snakeY < minY || snakeY > maxY;
+            
+            // On vérifie si la la tête de serpent n'est pas entre les murs 
+            if(isNotBetweenHorizontalWall || isNotBetweenVerticalWall){
+                // il y a une collision
+                wallCollision = true;
+            }
+            
+            // On vérifie que le serpent ne s'est pas passé sur le reste du corps   
+            for (var i = 0; i < rest.length; i++){
+                if (snakeX === rest[i][0] && snakeY === rest[i][1]){
+                    snakeCollision = true;
+                }
+            }
+            // 
+            return wallCollision || snakeCollision;
+        };
     }
-
+ 
     // On crée une fonction construsteur apple
     function Apple(position) {
         this.position = position;
