@@ -10,9 +10,10 @@ window.onload = function() {
     // On crée une variable qui stockera la largeur du canvas en nombre de blocks et non en pixels
     var heightInBlocks = canvasHeight / blockSize;
     var ctx;
-    var delay = 300; // en milliseconde
+    var delay = 100; // en milliseconde
     var snakee;
     var applee;
+    var score;
     // On appelle la fonction init()
     init();
     // On crée une fonction d'initialisation 
@@ -35,7 +36,8 @@ window.onload = function() {
         // On instancie l'objet applee avec les arguments de position
         applee = new Apple([10, 10]);
 
-
+        // On initialise la variable score à 0
+        score = 0;
         // On appelle la fonction pour rafraichir le canvas
         refreshCanvas();
     }
@@ -47,12 +49,14 @@ window.onload = function() {
 
         // Si la tête de serpent entre en collision
         if (snakee.checkCollision()) {
-
-            // Game over
-
+            gameOver();
         } else {
             // Si le serpent à manger la pomme on va placer la pomme à un nouvel endroit
             if (snakee.isEatingApple(applee)) {
+
+                // On incremente le score avec nombre de pommes mangées
+                // On initialise la variable score à 0
+                score++;
                 // Le serpent a mangé une pomme
                 snakee.ateApple = true;
                 // On donne une nouvelle position à la pomme tant qu'elle est sur le serpent 
@@ -67,10 +71,46 @@ window.onload = function() {
             snakee.draw();
             // On appelle la méthode draw
             applee.draw();
-
+            // On appelle la fonction draw.score
+            drawScore();
             // La fonction setTimeout permet de rappeler la fonction refreshCanvas après le delay de 1s 
             setTimeout(refreshCanvas, delay);
         }
+    }
+    // création de la function gamOver
+    function gameOver() {
+        ctx.save();
+        // On ecrit le texte gameOver avec la position x = 5px et Y = 15px
+        ctx.fillText('Game Over', 5, 15);
+        // On ecrit le texte 2éme texte
+        ctx.fillText('Appuyer sur la touche Espace pour rejouer', 5, 30);
+
+        ctx.restore();
+    }
+    // On crée la fonction restart avec un nouveau serpent
+    function restart() {
+        // On instancie l'objet snakee avec les arguments de position en commençant par la tête [6,4]
+        snakee = new Snake([[6, 4], [5, 4], [4, 4], [3, 4], [2, 4]], 'right');
+
+        // On instancie l'objet applee avec les arguments de position
+        applee = new Apple([10, 10]);
+
+        // On initialise la variable score à 0
+        score = 0;
+
+        // On appelle la fonction pour rafraichir le canvas
+        refreshCanvas();
+
+    }
+    // On crée une fonction pour afficher le score
+    function drawScore() {
+        ctx.save();
+
+        // On ecrit le nombre du score sous format string avec la fonction toString
+        ctx.fillText(score.toString(), 5, canvasHeight - 5);
+
+        ctx.restore();
+
     }
 
     // On crée la fonction drawBlock pour dessiner un block
@@ -268,23 +308,27 @@ window.onload = function() {
 
     }
 
-// On crée l'évènement onkeydown. La fonction handleKeyDown sera éxécutée quand la touche sera appuyée
+
+    // On crée l'évènement onkeydown. La fonction handleKeyDown sera éxécutée quand la touche sera appuyée
     document.onkeydown = function handleKeyDown(e) { // e est l'évènement
         var key = e.keyCode; // cela va nous donner le code que la touche va appuyer
         var newDirection;
         switch (key) {
-            case 37:
+            case 37: // Flèche gauche
                 newDirection = 'left';
                 break;
-            case 38:
+            case 38: // Flèche haut
                 newDirection = 'up';
                 break;
-            case 39:
+            case 39: // Flèche droite
                 newDirection = 'right';
                 break;
-            case 40:
+            case 40: // Flèche bas
                 newDirection = 'down';
                 break;
+            case 32: // Barre Espace
+                restart();
+                return;
                 // Sinon on ne continue pas la fonction, on arrête et on retourne 
             default :
                 return;
