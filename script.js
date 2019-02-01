@@ -14,6 +14,8 @@ window.onload = function() {
     var snakee;
     var applee;
     var score;
+    // On ajoute la variable timeout pour corriger le bug d'accélération du serpent à chaque restart
+    var timeout;
     // On appelle la fonction init()
     init();
     // On crée une fonction d'initialisation 
@@ -82,8 +84,9 @@ window.onload = function() {
             snakee.draw();
             // On appelle la méthode draw
             applee.draw();
-            // La fonction setTimeout permet de rappeler la fonction refreshCanvas après le delay de 1s 
-            setTimeout(refreshCanvas, delay);
+            /* On stocke dans la variable timeout, la fonction setTimeout qui permet 
+             * de rappeler la fonction refreshCanvas après le delay de 100ms */
+            timeout = setTimeout(refreshCanvas, delay);
         }
     }
     // création de la function gamOver
@@ -125,6 +128,9 @@ window.onload = function() {
         // On initialise la variable score à 0
         score = 0;
 
+        // On utilise la fonction clearTimeout pour supprimer l'accélération du serpent à chaque redémarrage du jeu
+        clearTimeout(timeout);
+        
         // On appelle la fonction pour rafraichir le canvas
         refreshCanvas();
 
